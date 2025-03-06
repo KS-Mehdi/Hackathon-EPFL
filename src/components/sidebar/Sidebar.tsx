@@ -10,27 +10,36 @@ export const Sidebar: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'chats' | 'contacts'>('chats');
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleNewChat = () => {
+    setShowNewChatModal(true);
+  };
 
   return (
-    <div className="flex flex-col h-full bg-white shadow-md w-80">
-      <SidebarHeader />
+    <div className="flex flex-col h-full bg-white shadow-md border-r border-gray-200 w-80">
+      <SidebarHeader
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onNewChat={handleNewChat}
+      />
 
       {/* Tabs */}
-      <div className="flex border-b">
+      <div className="flex border-b bg-white">
         <button
-          className={`flex-1 py-3 font-medium text-sm ${
+          className={`flex-1 py-3 font-medium text-sm transition-all ${
             activeTab === 'chats'
-              ? 'text-blue-500 border-b-2 border-blue-500'
-              : 'text-gray-600 hover:bg-gray-50'
+              ? 'text-blue-600 border-b-2 border-blue-500'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
           }`}
           onClick={() => setActiveTab('chats')}>
           Chats
         </button>
         <button
-          className={`flex-1 py-3 font-medium text-sm ${
+          className={`flex-1 py-3 font-medium text-sm transition-all ${
             activeTab === 'contacts'
-              ? 'text-blue-500 border-b-2 border-blue-500'
-              : 'text-gray-600 hover:bg-gray-50'
+              ? 'text-blue-600 border-b-2 border-blue-500'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
           }`}
           onClick={() => setActiveTab('contacts')}>
           Contacts
@@ -39,32 +48,24 @@ export const Sidebar: React.FC = () => {
 
       {/* List content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'chats' ? <ChatList /> : <ContactList />}
-      </div>
-
-      {/* Actions */}
-      <div className="p-3 border-t">
         {activeTab === 'chats' ? (
-          <div className="flex space-x-2">
-            <button
-              className="flex-1 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-              onClick={() => setShowNewChatModal(true)}>
-              New Chat
-            </button>
-            <button
-              className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              onClick={() => setShowNewGroupModal(true)}>
-              <Users className="w-5 h-5" />
-            </button>
-          </div>
+          <ChatList searchQuery={searchQuery} />
         ) : (
-          <button
-            className="w-full py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-            onClick={() => setShowNewChatModal(true)}>
-            New Chat
-          </button>
+          <ContactList />
         )}
       </div>
+
+      {/* Actions - Only show on Chats tab */}
+      {activeTab === 'chats' && (
+        <div className="p-3 border-t bg-gray-50">
+          <button
+            className="flex items-center justify-center space-x-2 w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all"
+            onClick={() => setShowNewGroupModal(true)}>
+            <Users className="w-5 h-5" />
+            <span>New Group</span>
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       {showNewChatModal && (

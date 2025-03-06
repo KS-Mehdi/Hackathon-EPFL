@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Search } from 'lucide-react';
 import { useChat, Contact } from '../../context/ChatContext';
+import { ModalTransition } from '../animations/Transitions';
+import { motion } from 'framer-motion';
 
 interface NewChatModalProps {
   onClose: () => void;
@@ -20,16 +22,17 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col">
+    <ModalTransition isVisible={true}>
+      <div className="bg-white rounded-lg w-full max-w-md max-h-[80vh] flex flex-col shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-medium text-lg">New Chat</h3>
-          <button
+          <motion.button
             className="p-1 rounded-full hover:bg-gray-100"
-            onClick={onClose}>
+            onClick={onClose}
+            whileTap={{ scale: 0.95 }}>
             <X className="w-5 h-5 text-gray-600" />
-          </button>
+          </motion.button>
         </div>
 
         {/* Search */}
@@ -41,6 +44,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full p-2 pl-8 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
             />
             <Search className="w-4 h-4 text-gray-500 absolute left-2 top-3" />
           </div>
@@ -49,7 +53,19 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
         {/* Contact list */}
         <div className="flex-1 overflow-y-auto">
           {filteredContacts.length > 0 ? (
-            <div className="divide-y">
+            <motion.div
+              className="divide-y"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.05,
+                  },
+                },
+              }}>
               {filteredContacts.map((contact) => (
                 <ContactItem
                   key={contact.id}
@@ -57,7 +73,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
                   onSelect={handleSelectContact}
                 />
               ))}
-            </div>
+            </motion.div>
           ) : (
             <div className="p-4 text-center text-gray-500">
               No contacts found.
@@ -65,7 +81,7 @@ export const NewChatModal: React.FC<NewChatModalProps> = ({ onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </ModalTransition>
   );
 };
 
@@ -76,12 +92,18 @@ interface ContactItemProps {
 
 const ContactItem: React.FC<ContactItemProps> = ({ contact, onSelect }) => {
   return (
-    <div
+    <motion.div
       className="flex items-center p-3 hover:bg-gray-100 cursor-pointer"
-      onClick={() => onSelect(contact.id)}>
+      onClick={() => onSelect(contact.id)}
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0 },
+      }}
+      whileHover={{ backgroundColor: 'rgba(243, 244, 246, 1)' }}
+      whileTap={{ scale: 0.98 }}>
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-white font-medium overflow-hidden">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-medium overflow-hidden shadow-sm">
           {contact.avatar ? (
             <img
               src={contact.avatar}
@@ -105,6 +127,6 @@ const ContactItem: React.FC<ContactItemProps> = ({ contact, onSelect }) => {
           {contact.status === 'online' ? 'Online' : 'Offline'}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

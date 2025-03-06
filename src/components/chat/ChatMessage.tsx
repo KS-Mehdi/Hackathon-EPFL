@@ -6,6 +6,8 @@ import {
   MoreVertical,
   Reply,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Avatar } from '../common/Avatar';
 
 export interface Message {
   id: string;
@@ -30,12 +32,14 @@ interface ChatMessageProps {
   message: Message;
   prevMessage?: Message;
   onReply: (messageId: string) => void;
+  index: number;
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   prevMessage,
   onReply,
+  index,
 }) => {
   const [showActions, setShowActions] = useState(false);
 
@@ -65,25 +69,54 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   };
 
+  // Animation variants
+  const messageVariants = {
+    hidden: {
+      opacity: 0,
+      x: message.isMine ? 20 : -20,
+      scale: 0.95,
+    },
+    visible: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      transition: {
+        duration: 0.2,
+        delay: index * 0.05, // Staggered appearance
+      },
+    },
+  };
+
   return (
-    <div
+    <motion.div
       className={`flex flex-col ${
         message.isMine ? 'items-end' : 'items-start'
       } ${isSequential ? 'mt-1' : 'mt-4'}`}
       onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}>
+      onMouseLeave={() => setShowActions(false)}
+      initial="hidden"
+      animate="visible"
+      variants={messageVariants}>
       {/* Reply Reference */}
       {message.replyTo && (
         <div
-          className={`flex items-center max-w-[75%] rounded px-2 py-1 text-xs mb-1 opacity-75 ${
-            message.isMine ? 'bg-blue-100 mr-2' : 'bg-gray-100 ml-2'
+          className={`flex items-center max-w-[75%] rounded-lg px-3 py-1.5 text-xs mb-1 shadow-sm ${
+            message.isMine ? 'bg-blue-50 mr-2' : 'bg-gray-50 ml-2'
           }`}>
-          <div className="w-0.5 h-8 mr-2 bg-gray-400"></div>
-          <div>
-            <div className="font-medium text-blue-500">
+          <div
+            className={`w-1 h-8 mr-2 rounded-full ${
+              message.isMine ? 'bg-blue-400' : 'bg-gray-400'
+            }`}></div>
+          <div className="flex-1">
+            <div
+              className={`font-medium ${
+                message.isMine ? 'text-blue-600' : 'text-gray-700'
+              }`}>
               {message.replyTo.sender}
             </div>
-            <div className="truncate">{message.replyTo.content}</div>
+            <div className="truncate text-gray-600">
+              {message.replyTo.content}
+            </div>
           </div>
         </div>
       )}
@@ -92,18 +125,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       <div className="group relative flex max-w-[75%]">
         {/* Sender Avatar (only for first message in sequence) */}
         {!message.isMine && !isSequential && (
-          <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 mr-2 overflow-hidden">
-            {message.sender.avatar ? (
-              <img
-                src={message.sender.avatar}
-                alt={message.sender.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white font-medium">
-                {message.sender.name.charAt(0)}
-              </div>
-            )}
+          <div className="mr-2">
+            <Avatar
+              name={message.sender.name}
+              image={message.sender.avatar}
+              size="sm"
+              colorSeed={message.sender.id.charCodeAt(0)}
+            />
           </div>
         )}
 
@@ -112,53 +140,72 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
         {/* Message Content */}
         <div
-          className={`relative rounded-lg px-3 py-2 shadow-sm ${
+          className={`relative rounded-2xl px-3.5 py-2.5 shadow-md ${
             message.isMine
-              ? 'bg-blue-500 text-white rounded-tr-none'
-              : 'bg-white border rounded-tl-none'
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-tr-none'
+              : 'bg-white border border-gray-200 rounded-tl-none'
           }`}>
           {/* Sender name (for group chats, non-sequential messages) */}
           {!message.isMine && !isSequential && (
-            <div className="text-xs font-medium text-blue-500 mb-1">
+            <div className="text-xs font-semibold text-blue-600 mb-1">
               {message.sender.name}
             </div>
           )}
 
           {/* Message Text */}
-          <p className="text-sm whitespace-pre-wrap break-words">
+          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
             {message.content}
           </p>
 
           {/* Message Footer */}
           <div
-            className={`flex items-center space-x-1 text-xs mt-1 ${
+            className={`flex items-center space-x-1 text-xs mt-1.5 ${
               message.isMine ? 'text-blue-100' : 'text-gray-500'
             }`}>
             <span>{formatTime(message.timestamp)}</span>
-            {message.verified && <ShieldCheck className="w-3 h-3" />}
+            {message.verified && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 500 }}>
+                <ShieldCheck
+                  className={`w-3.5 h-3.5 ${
+                    message.isMine ? 'text-blue-200' : 'text-emerald-500'
+                  }`}
+                />
+              </motion.div>
+            )}
             <StatusIcon />
           </div>
         </div>
 
         {/* Message Actions - visible on hover */}
         {showActions && (
-          <div
+          <motion.div
             className={`absolute top-0 ${
               message.isMine
                 ? 'left-0 -translate-x-full'
                 : 'right-0 translate-x-full'
-            } flex bg-white rounded-full shadow-md p-1`}>
-            <button
-              className="p-1 rounded-full hover:bg-gray-100"
-              onClick={() => onReply(message.id)}>
-              <Reply className="w-4 h-4 text-gray-600" />
-            </button>
-            <button className="p-1 rounded-full hover:bg-gray-100">
+            } flex bg-white rounded-full shadow-md p-1`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}>
+            <motion.button
+              className="p-1.5 rounded-full hover:bg-gray-100"
+              onClick={() => onReply(message.id)}
+              whileHover={{ backgroundColor: 'rgba(243, 244, 246, 1)' }}
+              whileTap={{ scale: 0.9 }}>
+              <Reply className="w-4 h-4 text-blue-500" />
+            </motion.button>
+            <motion.button
+              className="p-1.5 rounded-full hover:bg-gray-100"
+              whileHover={{ backgroundColor: 'rgba(243, 244, 246, 1)' }}
+              whileTap={{ scale: 0.9 }}>
               <MoreVertical className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

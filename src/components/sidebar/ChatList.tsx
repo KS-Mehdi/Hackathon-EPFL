@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import React from 'react';
 import { ChatItem } from './ChatItem';
 import { useChat } from '../../context/ChatContext';
+import { motion } from 'framer-motion';
 
-export const ChatList: React.FC = () => {
+interface ChatListProps {
+  searchQuery: string;
+}
+
+export const ChatList: React.FC<ChatListProps> = ({ searchQuery }) => {
   const { chats } = useChat();
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Filter chats based on search query
   const filteredChats = chats.filter(
@@ -19,34 +22,55 @@ export const ChatList: React.FC = () => {
     (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
   );
 
-  return (
-    <div>
-      {/* Search bar */}
-      <div className="p-3">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search chats"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 pl-8 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <Search className="w-4 h-4 text-gray-500 absolute left-2 top-3" />
-        </div>
-      </div>
+  // Animation variants for the container
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
+  };
 
-      {/* Chat list */}
-      <div className="divide-y">
-        {sortedChats.length > 0 ? (
-          sortedChats.map((chat) => <ChatItem key={chat.id} chat={chat} />)
-        ) : (
-          <div className="p-4 text-center text-gray-500">
-            {searchQuery
-              ? 'No chats found.'
-              : 'No chats yet. Start a new conversation!'}
+  return (
+    <div className="h-full bg-gray-50 flex flex-col">
+      {sortedChats.length > 0 ? (
+        <motion.div
+          className="divide-y divide-gray-200"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible">
+          {sortedChats.map((chat, index) => (
+            <ChatItem key={chat.id} chat={chat} index={index} />
+          ))}
+        </motion.div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+          <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+            <svg
+              className="w-8 h-8 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
           </div>
-        )}
-      </div>
+          <p className="text-gray-500 mb-1">
+            {searchQuery ? 'No chats found.' : 'No chats yet.'}
+          </p>
+          <p className="text-sm text-gray-400">
+            {searchQuery
+              ? 'Try a different search.'
+              : 'Start a new conversation!'}
+          </p>
+        </div>
+      )}
     </div>
   );
 };
