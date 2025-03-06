@@ -1,95 +1,98 @@
-import React from 'react';
-import { Send, Shield, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChatHeader } from './ChatHeader';
+import { ChatMessageList } from './ChatMessageList';
+import { ChatInput } from './ChatInput';
+import { ChatInfo } from '../info/ChatInfo';
+import { useChat } from '../../context/ChatContext';
 
-interface Message {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: Date;
-  verified: boolean;
-}
+export const ChatWindow: React.FC = () => {
+  const { chats, selectedChatId, sendMessage } = useChat();
+  const [showInfo, setShowInfo] = useState(false);
+  const [replyTo, setReplyTo] = useState<
+    | {
+        id: string;
+        content: string;
+        sender: string;
+      }
+    | undefined
+  >(undefined);
 
-export function ChatWindow() {
-  const [messages, setMessages] = React.useState<Message[]>([]);
-  const [newMessage, setNewMessage] = React.useState('');
+  // Get the currently selected chat
+  const selectedChat = selectedChatId
+    ? chats.find((chat) => chat.id === selectedChatId)
+    : null;
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  const handleSendMessage = (content: string) => {
+    if (selectedChatId) {
+      sendMessage(selectedChatId, content, replyTo?.id);
+      setReplyTo(undefined);
+    }
+  };
 
-    const message: Message = {
-      id: Date.now().toString(),
-      sender: 'You',
-      content: newMessage,
-      timestamp: new Date(),
-      verified: true,
-    };
+  const handleReply = (messageId: string) => {
+    if (!selectedChat) return;
 
-    setMessages((prev) => [...prev, message]);
-    setNewMessage('');
+    const messageToReply = selectedChat.messages.find(
+      (msg) => msg.id === messageId
+    );
+    if (messageToReply) {
+      setReplyTo({
+        id: messageId,
+        content: messageToReply.content,
+        sender: messageToReply.sender.name,
+      });
+    }
+  };
+
+  // If no chat is selected, show a placeholder
+  if (!selectedChat) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-gray-50">
+        <div className="text-gray-400 text-lg font-medium">
+          Select a chat or start a new conversation
+        </div>
+      </div>
+    );
+  }
+
+  // Create a chat data object for the header and info panel
+  const chatData = {
+    id: selectedChat.id,
+    name: selectedChat.name,
+    avatar: selectedChat.avatar,
+    status: selectedChat.isGroup
+      ? undefined
+      : selectedChat.participants?.find((p) => p.id !== 'me')?.status ||
+        'offline',
+    isGroup: selectedChat.isGroup,
+    participants: selectedChat.participants,
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
-        <div className="flex items-center space-x-2">
-          <ShieldCheck className="w-6 h-6 text-green-500" />
-          <h2 className="text-lg font-semibold">Secure Chat</h2>
-        </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
-          <Shield className="w-4 h-4" />
-          <span>End-to-End Encrypted</span>
-        </div>
+    <div className="flex h-full overflow-hidden">
+      {/* Main chat area */}
+      <div className="flex flex-col flex-1 bg-gray-50">
+        <ChatHeader
+          chat={chatData}
+          onInfoToggle={() => setShowInfo(!showInfo)}
+        />
+
+        <ChatMessageList
+          messages={selectedChat.messages}
+          onReply={handleReply}
+        />
+
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(undefined)}
+        />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex flex-col ${
-              message.sender === 'You' ? 'items-end' : 'items-start'
-            }`}
-          >
-            <div
-              className={`max-w-[70%] rounded-lg p-3 ${
-                message.sender === 'You'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white border'
-              }`}
-            >
-              <p>{message.content}</p>
-              <div
-                className={`flex items-center space-x-1 text-xs mt-1 ${
-                  message.sender === 'You' ? 'text-blue-100' : 'text-gray-500'
-                }`}
-              >
-                <span>{message.timestamp.toLocaleTimeString()}</span>
-                {message.verified && (
-                  <ShieldCheck className="w-3 h-3" />
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <form onSubmit={handleSend} className="p-4 border-t bg-white rounded-b-lg">
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </div>
-      </form>
+      {/* Info panel - conditionally shown */}
+      {showInfo && (
+        <ChatInfo chat={chatData} onClose={() => setShowInfo(false)} />
+      )}
     </div>
   );
-}
+};
