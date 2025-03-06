@@ -7,7 +7,6 @@ const EnterCode: React.FC = () => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    // Focus first input on mount
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
@@ -22,7 +21,6 @@ const EnterCode: React.FC = () => {
     newCode[index] = value;
     setCode(newCode);
 
-    // Move to next input if value is entered
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -33,17 +31,7 @@ const EnterCode: React.FC = () => {
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
-      // Move to previous input on backspace if current input is empty
       inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const verificationCode = code.join("");
-    if (verificationCode.length === 6) {
-      // TODO: Add verification logic here
-      console.log("Verification code:", verificationCode);
     }
   };
 
@@ -63,7 +51,7 @@ const EnterCode: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6">
             <div>
               <div className="flex justify-between gap-2">
                 {code.map((digit, index) => (
@@ -83,18 +71,9 @@ const EnterCode: React.FC = () => {
             </div>
 
             <div>
-              {/* implement later */}
-
-              {/* <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Verify
-              </button> */}
               <Link
-                // add the user connection logic
                 to="/chat"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Sign In
               </Link>

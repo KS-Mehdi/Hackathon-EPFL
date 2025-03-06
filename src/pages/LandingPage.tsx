@@ -1,39 +1,13 @@
 import React from "react";
-import { Shield, Lock, Users, Zap, CheckCircle, Globe, Building, Network } from "lucide-react";
+import { Lock, Users, Zap, CheckCircle, Globe, Building, Network, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import Header from "./LandingPage/comps/Header";
+import Footer from "./LandingPage/comps/Footer";
 
 const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Hero Section */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-blue-500" />
-              <h1 className="text-2xl font-bold text-gray-900">Secure Chat Verifier</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="hidden md:flex items-center space-x-4 text-sm text-gray-600">
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span>Connected to Hedera</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span>Mina Proof Ready</span>
-                </span>
-              </div>
-              <Link
-                to="/auth/signin"
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main>
         {/* Hero Section */}
@@ -188,41 +162,7 @@ const Dashboard: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Shield className="w-6 h-6 text-blue-400" />
-                <span className="text-xl font-bold text-white">Secure Chat Verifier</span>
-              </div>
-              <p className="text-sm">Privacy-first communication platform powered by blockchain technology</p>
-            </div>
-            <div>
-              <h5 className="text-white font-semibold mb-4">Technology</h5>
-              <ul className="space-y-2 text-sm">
-                <li>Mina Protocol</li>
-                <li>Hedera Hashgraph</li>
-                <li>Hylé Infrastructure</li>
-                <li>Zero-Knowledge Proofs</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="text-white font-semibold mb-4">Resources</h5>
-              <ul className="space-y-2 text-sm">
-                <li>Documentation</li>
-                <li>Privacy Policy</li>
-                <li>Terms of Service</li>
-                <li>Contact Support</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-            <p>&copy; 2024 Secure Chat Verifier. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
