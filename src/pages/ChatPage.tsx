@@ -1,8 +1,8 @@
 import React from "react";
+import { ChatWindow } from "../components/chat/ChatWindow";
 import { Shield } from "lucide-react";
-import { Link } from "react-router-dom";
 
-const Dashboard: React.FC = () => {
+const ChatPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
@@ -30,16 +30,11 @@ const Dashboard: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="h-[calc(100vh-12rem)]">
-          <Link
-            to="/chat"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            <span>Open Chat</span>
-          </Link>
+          <ChatWindow />
         </div>
       </main>
     </div>
   );
 };
 
-export default Dashboard;
+export default ChatPage;
